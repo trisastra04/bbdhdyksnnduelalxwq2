@@ -34,8 +34,14 @@
 <body class="bg-gray-100 text-gray-900 antialiased">
 
     <!-- Halaman Login -->
-    <div id="login-page" class="flex items-center justify-center min-h-screen">
+    <div id="login-page" class="flex items-center justify-center min-h-screen p-4">
         <div class="w-full max-w-sm mx-auto bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
+            <!-- LOGO DITAMBAHKAN DI SINI -->
+            <div class="flex justify-center items-center space-x-4 mb-6">
+                <img src="images/logo-sekolah.png" alt="Logo Sekolah" class="h-20 object-contain">
+                <img src="images/logo-osis.png" alt="Logo OSIS" class="h-20 object-contain">
+            </div>
+
             <h1 class="text-2xl font-bold text-center text-indigo-600 mb-2">Selamat Datang</h1>
             <p class="text-center text-gray-600 mb-6">Silakan masukkan kode unik Anda untuk memilih.</p>
             
@@ -56,6 +62,12 @@
     <!-- Halaman Voting (Awalnya Tersembunyi) -->
     <div id="voting-page" class="hidden container mx-auto px-4 py-8 md:py-12">
         <header class="text-center mb-10">
+            <!-- LOGO DITAMBAHKAN DI SINI -->
+            <div class="flex justify-center items-center space-x-6 mb-8">
+                <img src="images/logo-sekolah.png" alt="Logo Sekolah" class="h-24 object-contain">
+                <img src="images/logo-osis.png" alt="Logo OSIS" class="h-24 object-contain">
+            </div>
+
             <h1 class="text-3xl md:text-4xl font-bold text-indigo-600 tracking-tight">E-Voting Pemilihan Ketua & Wakil Ketua OSIS</h1>
             <p class="text-gray-600 mt-2 text-lg">Gunakan hak suaramu untuk memilih pemimpin masa depan!</p>
         </header>
@@ -72,7 +84,9 @@
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqPd7QrehPBTTaYjJOE72p68ogtX7OzM8b46v1xUHigCOEjXl8J0_7UdLwklo8HrP0/exec'; 
         
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7pUh4kIJI6xfQXlndQ5m5hXgU-1bzctmmhsbcaLmTMfHcq0rk4j73hRNpPRLtctfNG_ngQeEQcrj-/pub?gid=0&single=true&output=csv';
+        // URL untuk daftar SEMUA kode unik yang berhak memilih
+        const ALL_CODES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7pUh4kIJI6xfQXlndQ5m5hXgU-1bzctmmhsbcaLmTMfHcq0rk4j73hRNpPRLtctfNG_ngQeEQcrj-/pub?gid=0&single=true&output=csv';
+        
         let validCodes = [];
         let votedCodes = []; // Daftar kode yang sudah memilih dari server
         let loggedInCode = '';
@@ -102,11 +116,11 @@
                 loginButtonText.classList.add('hidden');
 
                 // 1. Ambil SEMUA kode yang valid dari CSV
-                const csvResponse = await fetch(CSV_URL);
-                const csvData = await csvResponse.text();
-                validCodes = csvData.split('\n').slice(1).map(row => row.split(',')[1]?.trim()).filter(Boolean);
+                const allCodesResponse = await fetch(ALL_CODES_CSV_URL);
+                const allCodesData = await allCodesResponse.text();
+                validCodes = allCodesData.split('\n').slice(1).map(row => row.split(',')[1]?.trim()).filter(Boolean);
                 
-                // 2. Ambil kode yang SUDAH MEMILIH dari Google Script (menggunakan GET)
+                // 2. PERBAIKAN: Ambil kode yang SUDAH MEMILIH langsung dari Google Script (real-time)
                 const scriptResponse = await fetch(SCRIPT_URL);
                 if (!scriptResponse.ok) throw new Error('Gagal menghubungi server.');
                 const result = await scriptResponse.json();
@@ -138,13 +152,13 @@
                  loginError.textContent = 'Data belum siap. Mohon tunggu atau muat ulang.'; return;
             }
 
-            // PENGECEKAN BARU: Apakah kode sudah pernah digunakan untuk memilih?
+            // PENGECEKAN UTAMA: Apakah kode sudah pernah digunakan untuk memilih (berdasarkan data real-time)?
             if (votedCodes.includes(code)) {
                 loginError.textContent = 'Kode unik ini sudah digunakan untuk memilih.';
                 return;
             }
             
-            // Pengecekan lama: Apakah kode ada di daftar yang valid?
+            // Pengecekan kedua: Apakah kode ada di daftar yang valid?
             if (!validCodes.includes(code)) {
                 loginError.textContent = 'Kode unik tidak valid.'; return;
             }
