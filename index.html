@@ -67,8 +67,8 @@
             {
                 id: 1,
                 number: '01',
-                ketua: 'Nazilah M.H',
-                wakil: 'Nheyrinda A.',
+                ketua: 'Nheyrinda A.',
+                wakil: 'Nasizalah M.H.',
                 visi: 'Menjadi wadah bagi siswa untuk bertindak, berkembang, dan menampung aspirasi untuk mengembangkan potensi.',
                 img: 'images/paslon1.png'
             },
@@ -130,7 +130,7 @@
                 const card = `
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 flex flex-col border border-gray-200">
                         <div class="relative">
-                            <img class="w-full h-96 object-cover object-top" src="${candidate.img}" alt="Pasangan Calon ${candidate.number}">
+                            <img class="w-full aspect-[9/16] object-cover object-top" src="${candidate.img}" alt="Pasangan Calon ${candidate.number}">
                             <div class="absolute top-0 right-0 bg-indigo-600 text-white text-3xl font-black w-16 h-16 flex items-center justify-center rounded-bl-2xl">
                                 ${candidate.number}
                             </div>
@@ -233,5 +233,4 @@
     </script>
 </body>
 </html>
-
 
