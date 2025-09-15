@@ -20,7 +20,7 @@
         .loader {
             border: 4px solid #f3f3f3;
             border-radius: 50%;
-            border-top: 4px solid #4f46e5;
+            border-top: 4px solid #d97706; /* Warna disesuaikan dengan tema */
             width: 24px;
             height: 24px;
             animation: spin 1s linear infinite;
@@ -42,20 +42,18 @@
                 <img src="images/logo-osis.png" alt="Logo OSIS" class="h-20 object-contain">
             </div>
 
-            <h1 class="text-2xl font-bold text-center text-indigo-600 mb-2">Selamat Datang</h1>
+            <h1 class="text-2xl font-bold text-center text-amber-600 mb-2">Selamat Datang</h1>
             <p class="text-center text-gray-600 mb-6">Silakan masukkan kode unik Anda untuk memilih.</p>
             
             <div class="space-y-4">
-                <input type="text" id="unique-code-input" placeholder="Masukkan Kode Unik" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
-                <button id="login-button" onclick="handleLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                <input type="text" id="unique-code-input" placeholder="Masukkan Kode Unik" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                <button id="login-button" onclick="handleLogin()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center">
                     <span id="login-button-text">Masuk</span>
                     <div id="login-loader" class="loader hidden"></div>
                 </button>
             </div>
             <p id="login-error" class="text-red-500 text-sm text-center mt-4 h-5"></p>
-            <div class="text-center mt-6">
-                <button onclick="resetAllData()" class="text-xs text-gray-500 hover:text-red-600">Reset Aplikasi</button>
-            </div>
+            <!-- Tombol Reset Aplikasi telah dihilangkan -->
         </div>
     </div>
 
@@ -68,7 +66,7 @@
                 <img src="images/logo-osis.png" alt="Logo OSIS" class="h-24 object-contain">
             </div>
 
-            <h1 class="text-3xl md:text-4xl font-bold text-indigo-600 tracking-tight">E-Voting Pemilihan Ketua & Wakil Ketua OSIS</h1>
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-500">E-Voting Pemilihan Ketua & Wakil Ketua OSIS</h1>
             <p class="text-gray-600 mt-2 text-lg">Gunakan hak suaramu untuk memilih pemimpin masa depan!</p>
         </header>
 
@@ -191,13 +189,13 @@
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 flex flex-col border border-gray-200">
                         <div class="relative">
                             <img class="w-full aspect-[9/16] object-cover object-top" src="${candidate.img}" alt="Paslon ${candidate.number}">
-                            <div class="absolute top-0 right-0 bg-indigo-600 text-white text-3xl font-black w-16 h-16 flex items-center justify-center rounded-bl-2xl">${candidate.number}</div>
+                            <div class="absolute top-0 right-0 bg-amber-600 text-white text-3xl font-black w-16 h-16 flex items-center justify-center rounded-bl-2xl">${candidate.number}</div>
                         </div>
-                        <div class="p-6 flex-grow flex flex-col">
+                        <div class="p-6 flex-grow flex flex-col text-center">
                             <h3 class="text-xl font-bold text-gray-900">${candidate.ketua}</h3>
-                            <p class="text-indigo-600 font-medium">${candidate.wakil}</p>
+                            <p class="text-amber-600 font-medium">${candidate.wakil}</p>
                             <p class="text-gray-600 text-sm mt-3 flex-grow">"${candidate.visi}"</p>
-                            <button id="vote-btn-${candidate.id}" onclick="castVote(${candidate.id})" class="vote-button w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300">
+                            <button id="vote-btn-${candidate.id}" onclick="castVote(${candidate.id})" class="vote-button w-full mt-6 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300">
                                 Pilih Paslon ${candidate.number}
                             </button>
                         </div>
