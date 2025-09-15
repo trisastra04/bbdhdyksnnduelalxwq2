@@ -46,19 +46,19 @@
 
     <!-- Halaman Login -->
     <div id="login-page" class="relative flex items-center justify-center min-h-screen p-4 overflow-hidden">
-        <div class="relative z-10 w-full max-w-sm mx-auto bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
+        <div class="relative z-10 w-full max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
             <!-- LOGO DITAMBAHKAN DI SINI -->
-            <div class="flex justify-center items-center space-x-4 mb-6">
-                <img src="images/logo-sekolah.png" alt="Logo Sekolah" class="h-20 object-contain">
-                <img src="images/logo-osis.png" alt="Logo OSIS" class="h-20 object-contain">
+            <div class="flex justify-center items-center space-x-4 mb-8">
+                <img src="images/logo-sekolah.png" alt="Logo Sekolah" class="h-24 object-contain">
+                <img src="images/logo-osis.png" alt="Logo OSIS" class="h-24 object-contain">
             </div>
 
-            <h1 class="text-2xl font-bold text-center text-amber-600 mb-2">Selamat Datang</h1>
-            <p class="text-center text-gray-600 mb-6">Silakan masukkan kode unik Anda untuk memilih.</p>
+            <h1 class="text-3xl font-bold text-center text-amber-600 mb-2">Selamat Datang</h1>
+            <p class="text-center text-gray-600 mb-8 text-lg">Silakan masukkan kode unik Anda untuk memilih.</p>
             
-            <div class="space-y-4">
-                <input type="text" id="unique-code-input" placeholder="Masukkan Kode Unik" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
-                <button id="login-button" onclick="handleLogin()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center">
+            <div class="space-y-6">
+                <input type="text" id="unique-code-input" placeholder="Masukkan Kode Unik" class="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                <button id="login-button" onclick="handleLogin()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 px-4 text-lg rounded-lg transition-colors duration-300 flex items-center justify-center">
                     <span id="login-button-text">Masuk</span>
                     <div id="login-loader" class="loader hidden"></div>
                 </button>
