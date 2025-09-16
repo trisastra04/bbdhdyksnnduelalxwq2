@@ -228,11 +228,11 @@
                             <img class="w-full aspect-[9/16] object-cover object-top" src="${candidate.img}" alt="Paslon ${candidate.number}">
                             <div class="absolute top-0 right-0 bg-amber-600 text-white text-3xl font-black w-16 h-16 flex items-center justify-center rounded-bl-2xl">${candidate.number}</div>
                         </div>
-                        <div class="p-6 flex-grow flex flex-col text-center">
-                            <h3 class="text-2xl font-bold text-gray-900">${candidate.ketua}</h3>
-                            <p class="text-amber-600 font-medium text-lg">${candidate.wakil}</p>
-                            <p class="text-gray-600 text-base mt-3 flex-grow">"${candidate.visi}"</p>
-                            <button id="vote-btn-${candidate.id}" onclick="castVote(${candidate.id})" class="vote-button w-full mt-6 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 text-lg rounded-lg transition-colors duration-300">
+                        <div class="p-4 flex-grow flex flex-col text-center">
+                            <h3 class="text-xl font-bold text-gray-900">${candidate.ketua}</h3>
+                            <p class="text-amber-600 font-medium text-base">${candidate.wakil}</p>
+                            <p class="text-gray-600 text-sm mt-2 flex-grow">"${candidate.visi}"</p>
+                            <button id="vote-btn-${candidate.id}" onclick="castVote(${candidate.id})" class="vote-button w-full mt-4 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 text-base rounded-lg transition-colors duration-300">
                                 Pilih Paslon ${candidate.number}
                             </button>
                         </div>
