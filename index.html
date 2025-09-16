@@ -93,8 +93,8 @@
             <!-- Konten notifikasi akan diisi oleh JavaScript -->
         </div>
 
-        <!-- Wrapper untuk memperkecil area kandidat -->
-        <div class="max-w-5xl mx-auto">
+        <!-- Wrapper untuk memperbesar area kandidat -->
+        <div class="max-w-7xl mx-auto">
             <main id="candidates-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                 <!-- Kartu kandidat akan di-generate oleh JavaScript -->
             </main>
@@ -229,10 +229,10 @@
                             <div class="absolute top-0 right-0 bg-amber-600 text-white text-3xl font-black w-16 h-16 flex items-center justify-center rounded-bl-2xl">${candidate.number}</div>
                         </div>
                         <div class="p-6 flex-grow flex flex-col text-center">
-                            <h3 class="text-xl font-bold text-gray-900">${candidate.ketua}</h3>
-                            <p class="text-amber-600 font-medium">${candidate.wakil}</p>
-                            <p class="text-gray-600 text-sm mt-3 flex-grow">"${candidate.visi}"</p>
-                            <button id="vote-btn-${candidate.id}" onclick="castVote(${candidate.id})" class="vote-button w-full mt-6 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300">
+                            <h3 class="text-2xl font-bold text-gray-900">${candidate.ketua}</h3>
+                            <p class="text-amber-600 font-medium text-lg">${candidate.wakil}</p>
+                            <p class="text-gray-600 text-base mt-3 flex-grow">"${candidate.visi}"</p>
+                            <button id="vote-btn-${candidate.id}" onclick="castVote(${candidate.id})" class="vote-button w-full mt-6 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 text-lg rounded-lg transition-colors duration-300">
                                 Pilih Paslon ${candidate.number}
                             </button>
                         </div>
