@@ -97,13 +97,14 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqPd7QrehPBTTaYjJOE72p68ogtX7OzM8b46v1xUHigCOEjXl8J0_7UdLwklo8HrP0/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCj_6ZC7NTCSdU1XWdduA0sm_kdtX7Q4kmXFfs6JNk5czycQ4ibYtDjfcMsk5aGl_Y/exec'; 
         
         // URL untuk daftar SEMUA kode unik yang berhak memilih
         const ALL_CODES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7pUh4kIJI6xfQXlndQ5m5hXgU-1bzctmmhsbcaLmTMfHcq0rk4j73hRNpPRLtctfNG_ngQeEQcrj-/pub?gid=0&single=true&output=csv';
         
         let validCodes = [];
         let votedCodes = []; // Daftar kode yang sudah memilih dari server
+        const codeClassMap = new Map(); // Untuk menyimpan pasangan [kode unik, kelas]
         let loggedInCode = '';
 
         const candidates = [
@@ -131,10 +132,22 @@
                 loginLoader.classList.remove('hidden');
                 loginButtonText.classList.add('hidden');
 
+                // Mengambil data kode unik dan kelas dari CSV
                 const allCodesResponse = await fetch(ALL_CODES_CSV_URL);
                 const allCodesData = await allCodesResponse.text();
-                validCodes = allCodesData.split('\n').slice(1).map(row => row.split(',')[1]?.trim()).filter(Boolean);
+                const rows = allCodesData.split('\n').slice(1);
                 
+                rows.forEach(row => {
+                    const columns = row.split(',');
+                    const code = columns[1]?.trim();
+                    const studentClass = columns[2]?.trim();
+                    if (code && studentClass) {
+                        codeClassMap.set(code, studentClass);
+                        validCodes.push(code);
+                    }
+                });
+                
+                // Mengambil data kode yang sudah memilih
                 const scriptResponse = await fetch(SCRIPT_URL);
                 if (!scriptResponse.ok) throw new Error('Gagal menghubungi server.');
                 const result = await scriptResponse.json();
@@ -230,8 +243,10 @@
             voteButton.innerHTML = `<div class="loader mx-auto"></div>`;
 
             const codeForVote = sessionStorage.getItem('loggedInCode');
-            if (!codeForVote) {
-                alert('Sesi tidak valid. Silakan login kembali.');
+            const userClass = codeClassMap.get(codeForVote); // Mengambil data kelas
+
+            if (!codeForVote || !userClass) {
+                alert('Sesi tidak valid atau data kelas tidak ditemukan. Silakan login kembali.');
                 window.location.reload();
                 return;
             }
@@ -241,7 +256,11 @@
                     method: 'POST',
                     redirect: 'follow', 
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ kodeUnik: codeForVote, pilihan: candidateId }),
+                    body: JSON.stringify({ 
+                        kodeUnik: codeForVote, 
+                        pilihan: candidateId, 
+                        kelas: userClass // Mengirim data kelas
+                    }),
                 });
                 
                 if (!response.ok) {
