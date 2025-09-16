@@ -99,12 +99,11 @@
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCj_6ZC7NTCSdU1XWdduA0sm_kdtX7Q4kmXFfs6JNk5czycQ4ibYtDjfcMsk5aGl_Y/exec'; 
         
-        // URL untuk daftar SEMUA kode unik yang berhak memilih
         const ALL_CODES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7pUh4kIJI6xfQXlndQ5m5hXgU-1bzctmmhsbcaLmTMfHcq0rk4j73hRNpPRLtctfNG_ngQeEQcrj-/pub?gid=0&single=true&output=csv';
         
         let validCodes = [];
-        let votedCodes = []; // Daftar kode yang sudah memilih dari server
-        const codeClassMap = new Map(); // Untuk menyimpan pasangan [kode unik, kelas]
+        let votedCodesFromServer = []; // Daftar kode yang sudah memilih dari server
+        const codeClassMap = new Map();
         let loggedInCode = '';
 
         const candidates = [
@@ -132,7 +131,6 @@
                 loginLoader.classList.remove('hidden');
                 loginButtonText.classList.add('hidden');
 
-                // Mengambil data kode unik dan kelas dari CSV
                 const allCodesResponse = await fetch(ALL_CODES_CSV_URL);
                 const allCodesData = await allCodesResponse.text();
                 const rows = allCodesData.split('\n').slice(1);
@@ -147,12 +145,11 @@
                     }
                 });
                 
-                // Mengambil data kode yang sudah memilih
                 const scriptResponse = await fetch(SCRIPT_URL);
                 if (!scriptResponse.ok) throw new Error('Gagal menghubungi server.');
                 const result = await scriptResponse.json();
                 if (result.status === 'success') {
-                    votedCodes = result.data;
+                    votedCodesFromServer = result.data;
                 } else {
                     throw new Error(result.message || 'Gagal memuat data suara.');
                 }
@@ -179,7 +176,7 @@
                  loginError.textContent = 'Data belum siap. Mohon tunggu atau muat ulang.'; return;
             }
 
-            if (votedCodes.includes(code)) {
+            if (votedCodesFromServer.includes(code)) {
                 loginError.textContent = 'Kode unik ini sudah digunakan untuk memilih.';
                 return;
             }
@@ -190,7 +187,6 @@
 
             loggedInCode = code;
             sessionStorage.setItem('loggedInCode', code);
-            localStorage.setItem('loggedIn', 'true');
             showVotingPage();
         }
 
@@ -199,7 +195,9 @@
             votingPage.classList.remove('hidden');
             renderCandidates();
             
-            if (localStorage.getItem('hasVoted') === 'true') {
+            // PERBAIKAN: Cek apakah KODE SAAT INI sudah memilih di browser ini.
+            const votedOnThisBrowser = JSON.parse(localStorage.getItem('votedOnThisBrowser') || '[]');
+            if (votedOnThisBrowser.includes(loggedInCode)) {
                 voteAlert.innerHTML = `
                     <p class="font-bold">Anda Sudah Memilih</p>
                     <p>Terima kasih atas partisipasi Anda.</p>`;
@@ -229,13 +227,17 @@
                     </div>`;
                 candidatesGrid.innerHTML += card;
             });
-             if (localStorage.getItem('hasVoted') === 'true') {
+            // PERBAIKAN: Cek juga di sini untuk menonaktifkan tombol setelah render
+            const votedOnThisBrowser = JSON.parse(localStorage.getItem('votedOnThisBrowser') || '[]');
+            if (votedOnThisBrowser.includes(loggedInCode)) {
                 disableAllButtons();
             }
         }
         
         async function castVote(candidateId) {
-            if (localStorage.getItem('hasVoted') === 'true') return;
+            // PERBAIKAN: Cek menggunakan daftar kode di localStorage
+            const votedOnThisBrowser = JSON.parse(localStorage.getItem('votedOnThisBrowser') || '[]');
+            if (votedOnThisBrowser.includes(loggedInCode)) return;
 
             document.querySelectorAll('.vote-button').forEach(btn => btn.disabled = true);
             const voteButton = document.getElementById(`vote-btn-${candidateId}`);
@@ -243,7 +245,7 @@
             voteButton.innerHTML = `<div class="loader mx-auto"></div>`;
 
             const codeForVote = sessionStorage.getItem('loggedInCode');
-            const userClass = codeClassMap.get(codeForVote); // Mengambil data kelas
+            const userClass = codeClassMap.get(codeForVote);
 
             if (!codeForVote || !userClass) {
                 alert('Sesi tidak valid atau data kelas tidak ditemukan. Silakan login kembali.');
@@ -259,7 +261,7 @@
                     body: JSON.stringify({ 
                         kodeUnik: codeForVote, 
                         pilihan: candidateId, 
-                        kelas: userClass // Mengirim data kelas
+                        kelas: userClass
                     }),
                 });
                 
@@ -270,15 +272,28 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    localStorage.setItem('hasVoted', 'true');
+                    // PERBAIKAN: Simpan KODE SPESIFIK ke localStorage
+                    const updatedVotedList = JSON.parse(localStorage.getItem('votedOnThisBrowser') || '[]');
+                    if (!updatedVotedList.includes(codeForVote)) {
+                        updatedVotedList.push(codeForVote);
+                    }
+                    localStorage.setItem('votedOnThisBrowser', JSON.stringify(updatedVotedList));
+                    
                     voteAlert.innerHTML = `
                         <p class="font-bold">Terima Kasih!</p>
                         <p>Suara Anda telah berhasil direkam. Anda tidak dapat memilih lagi.</p>`;
                     voteAlert.className = 'max-w-4xl mx-auto bg-green-100 border-l-4 border-green-500 text-green-800 p-4 rounded-lg mb-8';
                     logoutContainer.classList.remove('hidden');
                     disableAllButtons();
+
                 } else if (result.message === 'already_voted') {
-                    localStorage.setItem('hasVoted', 'true');
+                    // Jika server menolak, tetap tandai sudah memilih di browser ini
+                    const updatedVotedList = JSON.parse(localStorage.getItem('votedOnThisBrowser') || '[]');
+                    if (!updatedVotedList.includes(codeForVote)) {
+                        updatedVotedList.push(codeForVote);
+                    }
+                    localStorage.setItem('votedOnThisBrowser', JSON.stringify(updatedVotedList));
+                    
                     voteAlert.innerHTML = `
                         <p class="font-bold">Gagal Menyimpan Suara</p>
                         <p>Kode unik ini sudah pernah digunakan untuk memilih sebelumnya.</p>`;
@@ -309,13 +324,13 @@
         
         function handleLogout() {
             sessionStorage.removeItem('loggedInCode');
-            localStorage.removeItem('loggedIn');
+            // Kita tidak perlu menghapus apa pun dari localStorage agar status "sudah memilih" tetap ada
             window.location.reload();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             loggedInCode = sessionStorage.getItem('loggedInCode');
-            if (localStorage.getItem('loggedIn') === 'true' && loggedInCode) {
+            if (loggedInCode) {
                 showVotingPage();
             } else {
                 initializeAppData();
