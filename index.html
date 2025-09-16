@@ -46,6 +46,14 @@
 
     <!-- Halaman Login -->
     <div id="login-page" class="relative flex items-center justify-center min-h-screen p-4 overflow-hidden">
+        
+        <!-- Tombol Reset Aplikasi -->
+        <div class="absolute top-4 left-4 z-10">
+            <button onclick="promptForReset()" class="text-xs text-gray-500 hover:text-red-600 bg-white/50 backdrop-blur-sm px-2 py-1 rounded">
+                Reset Aplikasi
+            </button>
+        </div>
+
         <div class="relative z-10 w-full max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
             <!-- LOGO DITAMBAHKAN DI SINI -->
             <div class="flex justify-center items-center space-x-4 mb-8">
@@ -68,8 +76,16 @@
     </div>
 
     <!-- Halaman Voting (Awalnya Tersembunyi) -->
-    <div id="voting-page" class="hidden container mx-auto px-4 py-8 md:py-12">
-        <header class="text-center mb-6"> {/* Jarak diubah di sini dari mb-10 menjadi mb-6 */}
+    <div id="voting-page" class="hidden relative container mx-auto px-4 py-8 md:py-12">
+        
+        <!-- Tombol Logout -->
+        <div id="logout-container" class="absolute top-4 left-4 z-20 hidden">
+            <button onclick="handleLogout()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300">
+                Logout
+            </button>
+        </div>
+
+        <header class="text-center mb-6"> <!-- Jarak diubah di sini dari mb-10 menjadi mb-6 -->
             <!-- Baris untuk Logo dan Judul -->
             <div class="flex justify-center items-center gap-4 md:gap-8">
                 <!-- Logo Kiri -->
@@ -99,22 +115,16 @@
                 <!-- Kartu kandidat akan di-generate oleh JavaScript -->
             </main>
         </div>
-
-        <!-- Tombol Logout -->
-        <div id="logout-container" class="text-center mt-12 hidden">
-            <button onclick="handleLogout()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300">
-                Logout
-            </button>
-        </div>
     </div>
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCj_6ZC7NTCSdU1XWdduA0sm_kdtX7Q4kmXFfs6JNk5czycQ4ibYtDjfcMsk5aGl_Y/exec'; 
-        
         const ALL_CODES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7pUh4kIJI6xfQXlndQ5m5hXgU-1bzctmmhsbcaLmTMfHcq0rk4j73hRNpPRLtctfNG_ngQeEQcrj-/pub?gid=0&single=true&output=csv';
+        const ADMIN_PASSWORD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7pUh4kIJI6xfQXlndQ5m5hXgU-1bzctmmhsbcaLmTMfHcq0rk4j73hRNpPRLtctfNG_ngQeEQcrj-/pub?gid=1671566540&single=true&output=csv';
         
         let validCodes = [];
-        let votedCodesFromServer = []; // Daftar kode yang sudah memilih dari server
+        let votedCodesFromServer = [];
+        let adminPasswords = [];
         const codeClassMap = new Map();
         let loggedInCode = '';
 
@@ -143,10 +153,16 @@
                 loginLoader.classList.remove('hidden');
                 loginButtonText.classList.add('hidden');
 
-                const allCodesResponse = await fetch(ALL_CODES_CSV_URL);
+                // Ambil semua data secara paralel untuk efisiensi
+                const [allCodesResponse, scriptResponse, passwordResponse] = await Promise.all([
+                    fetch(ALL_CODES_CSV_URL),
+                    fetch(SCRIPT_URL),
+                    fetch(ADMIN_PASSWORD_CSV_URL)
+                ]);
+
+                // Proses data kode pemilih
                 const allCodesData = await allCodesResponse.text();
                 const rows = allCodesData.split('\n').slice(1);
-                
                 rows.forEach(row => {
                     const columns = row.split(',');
                     const code = columns[1]?.trim();
@@ -157,7 +173,7 @@
                     }
                 });
                 
-                const scriptResponse = await fetch(SCRIPT_URL);
+                // Proses data kode yang sudah memilih
                 if (!scriptResponse.ok) throw new Error('Gagal menghubungi server.');
                 const result = await scriptResponse.json();
                 if (result.status === 'success') {
@@ -165,6 +181,10 @@
                 } else {
                     throw new Error(result.message || 'Gagal memuat data suara.');
                 }
+
+                // Proses data password admin
+                const passwordData = await passwordResponse.text();
+                adminPasswords = passwordData.split('\n').slice(1).map(row => row.split(',')[0]?.trim()).filter(Boolean);
                 
             } catch (error) {
                 loginError.textContent = 'Gagal memuat data. Coba lagi nanti.';
@@ -207,7 +227,6 @@
             votingPage.classList.remove('hidden');
             renderCandidates();
             
-            // PERBAIKAN: Cek apakah KODE SAAT INI sudah memilih di browser ini.
             const votedOnThisBrowser = JSON.parse(localStorage.getItem('votedOnThisBrowser') || '[]');
             if (votedOnThisBrowser.includes(loggedInCode)) {
                 voteAlert.innerHTML = `
@@ -239,7 +258,6 @@
                     </div>`;
                 candidatesGrid.innerHTML += card;
             });
-            // PERBAIKAN: Cek juga di sini untuk menonaktifkan tombol setelah render
             const votedOnThisBrowser = JSON.parse(localStorage.getItem('votedOnThisBrowser') || '[]');
             if (votedOnThisBrowser.includes(loggedInCode)) {
                 disableAllButtons();
@@ -247,7 +265,6 @@
         }
         
         async function castVote(candidateId) {
-            // PERBAIKAN: Cek menggunakan daftar kode di localStorage
             const votedOnThisBrowser = JSON.parse(localStorage.getItem('votedOnThisBrowser') || '[]');
             if (votedOnThisBrowser.includes(loggedInCode)) return;
 
@@ -284,7 +301,6 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    // PERBAIKAN: Simpan KODE SPESIFIK ke localStorage
                     const updatedVotedList = JSON.parse(localStorage.getItem('votedOnThisBrowser') || '[]');
                     if (!updatedVotedList.includes(codeForVote)) {
                         updatedVotedList.push(codeForVote);
@@ -299,7 +315,6 @@
                     disableAllButtons();
 
                 } else if (result.message === 'already_voted') {
-                    // Jika server menolak, tetap tandai sudah memilih di browser ini
                     const updatedVotedList = JSON.parse(localStorage.getItem('votedOnThisBrowser') || '[]');
                     if (!updatedVotedList.includes(codeForVote)) {
                         updatedVotedList.push(codeForVote);
@@ -336,8 +351,30 @@
         
         function handleLogout() {
             sessionStorage.removeItem('loggedInCode');
-            // Kita tidak perlu menghapus apa pun dari localStorage agar status "sudah memilih" tetap ada
             window.location.reload();
+        }
+
+        function promptForReset() {
+            if (adminPasswords.length === 0) {
+                alert('Data admin belum siap. Coba lagi sesaat.');
+                return;
+            }
+            const password = prompt("Masukkan password admin untuk mereset data browser:");
+            if (password === null) return; // Pengguna menekan Batal
+
+            if (adminPasswords.includes(password)) {
+                resetAllData();
+            } else {
+                alert("Password salah.");
+            }
+        }
+
+        function resetAllData() {
+            if (confirm('YAKIN INGIN MERESET? Tindakan ini akan menghapus status login dan riwayat vote di browser ini.')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.reload();
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
